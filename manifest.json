@@ -43,7 +43,30 @@
             /* ios打包配置 */
             "ios" : {},
             /* SDK配置 */
-            "sdkConfigs" : {}
+            "sdkConfigs" : {},
+            /* App 应用图标：源图统一用 static/logo.png，正式打包时建议用 HBuilderX 视觉编辑器按源图重新生成各密度尺寸 */
+            "icons" : {
+                "android" : {
+                    "ldpi" : "static/logo.png",
+                    "mdpi" : "static/logo.png",
+                    "hdpi" : "static/logo.png",
+                    "xhdpi" : "static/logo.png",
+                    "xxhdpi" : "static/logo.png",
+                    "xxxhdpi" : "static/logo.png"
+                },
+                "ios" : {
+                    "appstore" : "static/logo.png"
+                }
+            },
+            /* App 启动图（加载界面）：源图统一用 static/home.png，iOS 侧同样建议用视觉编辑器生成 */
+            "splashscreen" : {
+                "android" : {
+                    "hdpi" : "static/home.png",
+                    "xhdpi" : "static/home.png",
+                    "xxhdpi" : "static/home.png",
+                    "xxxhdpi" : "static/home.png"
+                }
+            }
         }
     },
     /* 快应用特有相关 */

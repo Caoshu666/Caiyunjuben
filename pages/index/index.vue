@@ -9,6 +9,16 @@
 		wxml 的条件渲染，各端行为完全一致。
 	-->
 	<view class="ws-root">
+		<!--
+			启动加载页：应用一进来先完整展示一张启动图（/static/home.png），
+			短暂停留后淡出，再露出隐私页 / 首页。放在这一层而不是单独注册页面，
+			是为了让 H5 / 小程序 / App 三端都吃到同一套加载体验，而且不参与
+			游戏状态机，不影响返回键与存档逻辑。
+		-->
+		<view v-if="splashVisible" class="ws-splash" :class="{ 'is-fading': splashFading }">
+			<image class="ws-splash__bg" src="/static/home.png" mode="aspectFill" />
+		</view>
+
 		<ScreenPrivacy v-if="game.screen === 'privacy'" :game="game" />
 		<ScreenHome v-else-if="game.screen === 'home'" :game="game" />
 		<ScreenCodex v-else-if="game.screen === 'codex'" :game="game" />
@@ -24,6 +34,7 @@
 </template>
 
 <script>
+	import { ref, onMounted } from 'vue'
 	import { useGame } from '../../composables/useGame.js'
 
 	import ScreenPrivacy from '../../components/screens/screen-privacy.vue'
@@ -53,7 +64,21 @@
 		setup() {
 			// 单例，页面与所有子组件共享同一个引擎实例
 			const game = useGame()
-			return { game }
+
+			// 启动加载页：先显示，再淡出。留 0.75s 给首屏渲染缓冲，也不让玩家干等。
+			const splashVisible = ref(true)
+			const splashFading = ref(false)
+
+			onMounted(() => {
+				setTimeout(() => {
+					splashFading.value = true
+				}, 750)
+				setTimeout(() => {
+					splashVisible.value = false
+				}, 1150)
+			})
+
+			return { game, splashVisible, splashFading }
 		},
 		/**
 		 * 小程序端的分享内容必须在页面层声明，子组件里写不生效。
@@ -94,6 +119,28 @@
 </script>
 
 <style lang="scss" scoped>
+	/* 启动加载页：盖满全屏（含安全区），淡出后从渲染树移除 */
+	.ws-splash {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1000;
+		background-color: #FAF7F0;
+		transition: opacity 0.35s ease;
+
+		&.is-fading {
+			opacity: 0;
+			pointer-events: none;
+		}
+
+		&__bg {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
 	.ws-root {
 		/*
 			min-height: 100vh + 子级 flex:1，让每个界面都能「撑满一屏但不被裁切」：
