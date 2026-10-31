@@ -1,0 +1,30 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "我的财运剧本",
+				/*
+				 * 游戏类应用不需要系统导航栏：顶部空间要留给内容，
+				 * 而且我们的界面自己带了标题与返回逻辑。
+				 */
+				"navigationStyle": "custom",
+				"backgroundColor": "#FAF7F0",
+				"backgroundColorTop": "#FAF7F0",
+				"backgroundColorBottom": "#FAF7F0",
+				"enablePullDownRefresh": false,
+				/* 小程序端允许下拉时页面正常滚动，不做回弹吸附 */
+				"disableScroll": false
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "我的财运剧本",
+		"navigationBarBackgroundColor": "#FAF7F0",
+		"backgroundColor": "#FAF7F0",
+		"backgroundColorTop": "#FAF7F0",
+		"backgroundColorBottom": "#FAF7F0"
+	},
+	"uniIdRouter": {}
+}
