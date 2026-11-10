@@ -10,7 +10,7 @@
  */
 import UniAdapter from './uni-adapter.js';
 import Sfx from './sfx.js';
-import { platform, isMiniProgram, isWeixin, hasRewardedVideo } from './env.js';
+import { platform, isMiniProgram, isWeixin, hasRewardedVideo, miniProgramQrPath } from './env.js';
 
 /**
  * 创建一整套平台能力
@@ -22,5 +22,5 @@ function create(opts) {
   return { adapter, sfx };
 }
 
-export default { create, platform, isMiniProgram, isWeixin, hasRewardedVideo, UniAdapter, Sfx };
-export { create, platform, isMiniProgram, isWeixin, hasRewardedVideo, UniAdapter, Sfx };
+export default { create, platform, isMiniProgram, isWeixin, hasRewardedVideo, miniProgramQrPath, UniAdapter, Sfx };
+export { create, platform, isMiniProgram, isWeixin, hasRewardedVideo, miniProgramQrPath, UniAdapter, Sfx };

@@ -81,8 +81,18 @@ UniAdapter.prototype.vibrate = function (type) {
 };
 
 /* ------------------------------------------------------------------ */
-/* 激励视频                                                            */
+/* 激励视频 —— 【广告暂时下线】                                          */
 /* ------------------------------------------------------------------ */
+
+/*
+ * ⚠️ 广告功能暂时下线，等访客多了再植入。
+ * 恢复步骤：
+ *   1) 取消下面 _ensureAd 整段的注释；
+ *   2) 删掉 showRewardedVideo 里那行 `return Promise.resolve(true);`，
+ *      并取消其后整段注释。
+ *
+ * 现阶段 showRewardedVideo 一律【直接放行】（返回 true），
+ * 不创建、不播放任何激励视频，也没有任何「模拟广告」流程。
 
 UniAdapter.prototype._ensureAd = function () {
   if (this._ad) return this._ad;
@@ -95,30 +105,22 @@ UniAdapter.prototype._ensureAd = function () {
   }
   return this._ad;
 };
+*/
 
 /**
  * 播放激励视频
  * @returns {Promise<boolean>} 是否完整看完（true 才允许发放奖励）
  *
- * 降级策略：没配广告位 / 当前端不支持 → 走「开发期模拟」，延时 1.5s 后返回 true，
- * 保证翻盘链路在 H5 预览里也能完整走通。上线前务必把 adUnitId 配上，
- * 否则等于免费送奖励。
+ * 【广告暂时下线】直接返回 true，不做任何广告相关动作。
  */
 UniAdapter.prototype.showRewardedVideo = function (place) {
+  return Promise.resolve(true);
+
+  /* 恢复广告时删除上面这行 return，并取消下面整段注释：
   const self = this;
 
   if (!hasRewardedVideo() || !this.adUnitId) {
-    if (typeof console !== 'undefined') {
-      console.warn(
-        '[UniAdapter] 未配置激励视频广告位（' + this.platform + ' 端），本次走开发期模拟。' +
-        '上线前请在 platform/uni-adapter.js 填入 adUnitId。'
-      );
-    }
-    return new Promise(function (resolve) {
-      setTimeout(function () {
-        resolve(true);
-      }, 1500);
-    });
+    return Promise.resolve(true);
   }
 
   return new Promise(function (resolve) {
@@ -158,6 +160,7 @@ UniAdapter.prototype.showRewardedVideo = function (place) {
       finish(false);
     });
   });
+  */
 };
 
 /* ------------------------------------------------------------------ */

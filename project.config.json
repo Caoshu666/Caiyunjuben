@@ -1,9 +1,18 @@
 {
-	"appid": "wxa636d1d7accabd8f",
+	"appid": "wx691cf5f5f633f0f1",
 	"compileType": "miniprogram",
 	"libVersion": "3.17.6",
 	"packOptions": {
-		"ignore": [],
+		"ignore": [
+			{
+				"type": "file",
+				"value": "ws.js"
+			},
+			{
+				"type": "file",
+				"value": "data/index.js"
+			}
+		],
 		"include": []
 	},
 	"setting": {

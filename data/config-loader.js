@@ -128,4 +128,4 @@
 
   NS.ConfigLoader = ConfigLoader;
   NS.ConfigLoader.SCHEMA_VERSION = SCHEMA_VERSION;
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

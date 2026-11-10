@@ -22,7 +22,7 @@
  */
 import { ref, computed, reactive, markRaw } from 'vue';
 import WS from '../ws.js';
-import { create as createPlatform, isWeixin, hasRewardedVideo } from '../platform/index.js';
+import { create as createPlatform, isWeixin, hasRewardedVideo, miniProgramQrPath } from '../platform/index.js';
 
 const A = WS.AttrSystem;
 
@@ -456,10 +456,13 @@ function boot(opts) {
       if (!ok) showToast('存档已失效，请重新开始');
     }),
 
-    /** 看激励视频翻盘。返回是否成功，供界面决定是否收起弹层 */
+    /* 【广告暂时下线】两个广告动作先注释掉；恢复广告时取消本段注释，
+       并把 screen-ending.vue 的 onToCard 改回 watchAdForResultCard()。
+
+    /// 看激励视频翻盘。返回是否成功，供界面决定是否收起弹层
     watchAd: function () {
       busy.value = true;
-      busyText.value = hasRewardedVideo() ? '广告播放中…' : '正在模拟广告…';
+      busyText.value = hasRewardedVideo() ? '广告播放中…' : '请稍候…';
       return engine
         .watchAdForRevive()
         .then(function (ok) {
@@ -476,16 +479,10 @@ function boot(opts) {
         });
     },
 
-    /**
-     * 看激励视频后才放行「看看我的结果卡」。
-     *
-     * 和 watchAd 的区别：这里不涉及状态机，只是「播完广告再执行一个普通动作」，
-     * 所以编排放在桥接层，不往引擎里加方法。看完才 engine.toResultCard()，
-     * 没看完就停在结局页，避免「不看广告也能拿奖励」。
-     */
+    /// 看激励视频后才放行「看看我的结果卡」。
     watchAdForResultCard: function () {
       busy.value = true;
-      busyText.value = hasRewardedVideo() ? '广告播放中…' : '正在模拟广告…';
+      busyText.value = hasRewardedVideo() ? '广告播放中…' : '请稍候…';
       return adapter
         .showRewardedVideo('result_card')
         .then(function (ok) {
@@ -504,6 +501,7 @@ function boot(opts) {
           return false;
         });
     }
+    */
   };
 
   /* ---------------- 工具方法 ---------------- */
@@ -584,7 +582,9 @@ function boot(opts) {
     LABEL: A.LABEL,
     CRISIS_LINE: A.CRISIS_LINE,
     isWeixin: isWeixin(),
-    hasRewardedVideo: hasRewardedVideo()
+    hasRewardedVideo: hasRewardedVideo(),
+    // 结果卡底部二维码：按当前平台返回对应小程序码图片路径（无则为空串）
+    qrCodePath: miniProgramQrPath()
   });
 
   return singleton;

@@ -8,7 +8,7 @@
   NS.Tables = NS.Tables || {};
 
   NS.Tables.text = {
-    title: '我的财运剧本',
+    title: '财富模拟器',
     slogan: '先测人格，再过一局人生',
 
     btnStart: '开始写我的剧本',
@@ -21,6 +21,7 @@
     btnShare: '分享给朋友',
     btnAgree: '同意并继续',
     btnReject: '拒绝',
+    // 【广告暂时下线】翻盘弹层已注释；这两条文案先保留（供以后恢复，也满足文案完整性检查）
     btnWatchAd: '看完广告，重来一次',
     btnSkipAd: '算了，就这样吧',
     btnBack: '返回',
@@ -92,7 +93,7 @@
     summaryBack: '上一件事选错了？回去改一下',
 
     endingTitle: '你的财富剧本结局',
-    resultTitle: '我的财运剧本',
+    resultTitle: '财富模拟器',
 
     privacyTitle: '隐私与用户协议',
     privacyBody:
@@ -102,6 +103,7 @@
       '这些数据不会上传到任何服务器，也不会用于任何商业用途。\n\n' +
       '点击「同意并继续」即表示你已阅读并同意上述说明。',
 
+    // 【广告暂时下线】翻盘弹层已注释；这两条文案先保留（供以后恢复，也满足文案完整性检查）
     reviveTitle: '人生没有重来',
     reviveBody: '但剧本可以。\n看完一段广告，回到第 4 阶段重新选择一次。',
 
@@ -120,4 +122,4 @@
     gradeC: '遗憾剧本',
     hiddenTag: '隐藏结局'
   };
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

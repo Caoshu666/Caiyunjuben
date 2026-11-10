@@ -21,6 +21,7 @@
   function TestEngine(opts) {
     opts = opts || {};
     this.questions = opts.questions || [];
+    this.banks = opts.banks || null; // 可选：题库组 [{key, questions}]
     this.rng = opts.rng;
     if (!this.rng) throw new Error('[TestEngine] 需要传入 rng');
 
@@ -49,6 +50,29 @@
     this.lastChoice = [];
     this.records = []; // 答题记录，用于埋点 / 分享校验
   }
+
+  /**
+   * 从题库组里随机选一套作为本次抽题的题池。
+   *
+   * 调用时机：在 start() 之前（或之后、抽题前）调用。
+   * 行为：从 this.banks（形如 [{key, questions}]）里随机挑一个 bank，
+   * 把它的 questions 作为后续按维度抽题的题池。
+   *
+   * 向后兼容：如果没传 banks，或 banks 为空，则保持 this.questions 不变
+   * （即沿用「全部题混抽」的旧行为）。因此这个方法对老调用方是无害的。
+   *
+   * @returns {this}
+   */
+  TestEngine.prototype.pickBank = function () {
+    if (this.banks && this.banks.length) {
+      var bank = this.rng.pick(this.banks);
+      if (bank && bank.questions && bank.questions.length) {
+        this.questions = bank.questions;
+        this.currentBank = bank.key;
+      }
+    }
+    return this;
+  };
 
   /** 抽题并开始 */
   TestEngine.prototype.start = function () {
@@ -197,4 +221,4 @@
 
   NS.TestEngine = TestEngine;
   NS.TestEngine.DIMS = DIMS;
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

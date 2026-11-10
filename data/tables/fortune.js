@@ -122,4 +122,4 @@
     /** 幸运方位 */
     directions: ['正东', '东南', '正南', '西南', '正西', '西北', '正北', '东北']
   };
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

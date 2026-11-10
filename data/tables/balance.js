@@ -39,4 +39,4 @@
     /** 缩放后如果变成 0 但原值非 0，至少保留 1，避免出现「无效果」的选项 */
     minAbs: 1
   };
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

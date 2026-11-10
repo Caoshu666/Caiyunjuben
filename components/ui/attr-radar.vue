@@ -3,11 +3,14 @@
 		5 维雷达图。全项目仅剩的两处 Canvas 之一（另一处是结果卡），
 		原因见 utils/canvas-kit.js 顶部注释：五边形数据面用纯 CSS 在部分小程序端
 		兼容性不稳，Canvas 反而最可靠。
+
+		★ 同结果卡：用 type="2d" 新版接口。旧的 canvas-id 接口在抖音小程序里
+		  整块 canvas 不渲染（一片空白），改用新版接口后微信 / 抖音 / H5 一致。
 	-->
 	<view class="radar-wrap" :style="{ width: size + 'rpx', height: size + 'rpx' }">
 		<canvas
 			class="radar"
-			:canvas-id="cid"
+			type="2d"
 			:id="cid"
 			:style="{ width: size + 'rpx', height: size + 'rpx' }"
 		/>
@@ -17,7 +20,7 @@
 <script>
 	import { radar, ATTRS, ATTR_LABEL } from '../../utils/canvas-kit.js'
 
-	// canvas-id 必须在页面内唯一，否则多个雷达图会互相覆盖
+	// canvas id 必须在页面内唯一，否则多个雷达图会互相覆盖
 	let uidSeq = 0
 
 	export default {
@@ -57,24 +60,65 @@
 				}
 			},
 			draw() {
+				const self = this
+				uni.createSelectorQuery()
+					.in(this)
+					.select('#' + this.cid)
+					.fields({ node: true, size: true })
+					.exec(function (res) {
+						const info = res && res[0]
+						if (!info || !info.node) {
+							self.drawLegacy()
+							return
+						}
+						try {
+							const canvas = info.node
+							let dpr = 1
+							try {
+								dpr = uni.getSystemInfoSync().pixelRatio || 1
+							} catch (e) {
+								/* ignore */
+							}
+							const wpx = info.width || self.size * self.pxPerRpx()
+							const hpx = info.height || wpx
+							canvas.width = Math.round(wpx * dpr)
+							canvas.height = Math.round(hpx * dpr)
+							const ctx = canvas.getContext('2d')
+							// 设计单位 → 设备像素，一次到位的变换。
+							// ★ 缩放必须由「实测画布宽度」推导，不能用 windowWidth/750：
+							//   H5 宽屏时 rpx 会被 maxDeviceWidth(默认960) 封顶，而
+							//   windowWidth 未封顶，二者不一致会把图形放大到画布之外
+							//   （表现为雷达图只显示一部分 / 位置空一块）。
+							const k = wpx / self.size
+							ctx.setTransform(dpr * k, 0, 0, dpr * k, 0, 0)
+							self.paint(ctx)
+						} catch (e) {
+							if (typeof console !== 'undefined') {
+								console.warn('[AttrRadar] 绘制失败，已降级为仅显示属性条', e)
+							}
+						}
+					})
+			},
+			paint(ctx) {
 				const size = this.size
 				const entries = ATTRS.map((k) => ({
 					label: ATTR_LABEL[k] || k,
 					value: (this.attrs && this.attrs[k]) || 0
 				}))
-
+				radar(ctx, size / 2, size / 2, size * 0.30, entries, { labelSize: 22 })
+			},
+			/** 拿不到 2d 节点时回退旧接口（仅个别环境） */
+			drawLegacy() {
+				const size = this.size
+				const entries = ATTRS.map((k) => ({
+					label: ATTR_LABEL[k] || k,
+					value: (this.attrs && this.attrs[k]) || 0
+				}))
 				try {
-					// 第二个参数传组件实例，小程序端在组件内取 canvas 必须带它
 					const ctx = uni.createCanvasContext(this.cid, this)
 					const scale = this.pxPerRpx()
-
-					// 声明式坐标系（设计单位）→ 实际画布坐标（css px）
 					ctx.scale(scale, scale)
-
-					radar(ctx, size / 2, size / 2, size * 0.30, entries, {
-						labelSize: 22
-					})
-
+					radar(ctx, size / 2, size / 2, size * 0.30, entries, { labelSize: 22 })
 					ctx.draw()
 				} catch (e) {
 					// 雷达图只是锦上添花：画不出来也不能让整个页面挂掉，

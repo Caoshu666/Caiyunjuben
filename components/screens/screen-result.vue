@@ -8,6 +8,7 @@
 			:attrs="attrs"
 			:result="result"
 			:pseudo-percent="pct"
+			:qr-path="game.qrCodePath"
 		/>
 
 		<view class="result-actions">
@@ -127,7 +128,7 @@
 								this.game.showToast('生成失败，请截图保存')
 								return false
 							}
-							return this.game.adapter.saveFile(filePath, '我的财运剧本.png')
+							return this.game.adapter.saveFile(filePath, '财富模拟器.png')
 						})
 						.then((ok) => {
 							this.game.showToast(ok ? '结果卡已保存' : '保存失败，请截图保存')

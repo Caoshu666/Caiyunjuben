@@ -23,9 +23,9 @@
 				放在确认按钮【下方】而不是上方：走完了全部 8 题的人绝大多数是认可的，
 				把它放在主操作上面反而会削弱「仪式感」；但真答错的人会往下找一眼就能看到。
 			-->
-			<text class="build__edit" hover-class="ws-tap--hover" :hover-stay-time="60" @tap="onEdit">
+			<!-- <text class="build__edit" hover-class="ws-tap--hover" :hover-stay-time="60" @tap="onEdit">
 				{{ game.t('buildEdit') }}
-			</text>
+			</text> -->
 			<WsButton :label="game.t('btnConfirm')" size="lg" @tap="onConfirm" />
 		</view>
 

@@ -5,7 +5,7 @@
  *   registry → rng → expr-evaluator → attr-system → persona-resolver
  *            → test-engine → event-draw → ending-judge → daily → game-engine
  *
- * 其中 9 个模块从上游项目「我的财运剧本」（微信小游戏版）逐字复制，一行未改；
+ * 其中 9 个模块从上游项目「财富模拟器」（微信小游戏版）逐字复制，一行未改；
  * daily.js 是为 uni-app 版新增的「每日财运签」，同样零平台依赖。它们：
  *   - 不引用 wx.* / uni.* / document / window
  *   - 不引用任何渲染 API
@@ -25,7 +25,14 @@ import './ending-judge.js';
 import './daily.js';
 import './game-engine.js';
 
-const WS = globalThis.WS;
+// 抖音小程序运行时没有 globalThis/window/self，只有 global，所以必须逐级兜底
+const g =
+  (typeof globalThis !== 'undefined' && globalThis) ||
+  (typeof self !== 'undefined' && self) ||
+  (typeof window !== 'undefined' && window) ||
+  (typeof global !== 'undefined' && global);
+
+const WS = g && g.WS;
 
 export default WS;
 export { WS };

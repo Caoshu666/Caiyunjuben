@@ -1,9 +1,9 @@
-# 我的财运剧本 · uni-app 版
+# 财富模拟器 · uni-app 版
 
 > 先测人格，再过一局人生 —— 8 道题算出你的「财运人格」，再用 5-8 分钟走完一局人生抉择，
 > 看看你的财富剧本会走向哪一种结局。
 
-本项目是《我的财运剧本》的 **uni-app 实现**，可编译到 **H5 / 微信小程序 / App / 支付宝小程序** 等多端。
+本项目是《财富模拟器》的 **uni-app 实现**，可编译到 **H5 / 微信小程序 / App / 支付宝小程序** 等多端。
 
 > 上游另有一个「微信小游戏 + Canvas 自绘」版本。两者的关系、以及这次融合做了哪些取舍，
 > 见下面的 [与上游版本的差异](#与上游版本的差异)。
@@ -569,8 +569,9 @@ scoped 样式靠 `[data-v-xxx]` 属性选择器匹配，各端编译器对动画
 - [ ] `manifest.json` → `mp-weixin.appid` 填真实 AppID
 - [ ] `platform/uni-adapter.js` → `AD_UNIT_PLACEHOLDER` 填微信后台申请到的激励视频广告位 ID
       **不填的话翻盘会走「开发期模拟」，等于免费送奖励**
-- [ ] 结果卡小程序码：`utils/canvas-kit.js` 的 `drawResultCard` 现在是占位方块，
-      有真实码图后改成 `ctx.drawImage`
+- [ ] 结果卡小程序码：能力已接好（`utils/canvas-kit.js` 的 `drawResultCard` 会按平台
+      用 `ctx.drawImage` 画码）。上线前需在微信 / 抖音开放平台各生成一张指向首页的小程序码，
+      分别放到 `static/qrcode/wx.png`、`static/qrcode/tt.png`。缺图时该端不画码、只显示引导文案
 - [ ] 小程序端音效（可选）：见第二节「音效的能力降级」
 - [ ] 软著 / 电子版权认证、游戏自审自查报告、隐私政策、ICP 备案
 - [ ] 防沉迷实名接入（`platform/uni-adapter.js` 预留扩展位）
@@ -601,3 +602,10 @@ scoped 样式靠 `[data-v-xxx]` 属性选择器匹配，各端编译器对动画
 
 5. **新增核心模块时别忘了挂载。** `core/` 下新加文件后，必须在 `core/index.js` 里补一行
    `import './xxx.js'`，否则打包器不会把它纳入依赖图（H 组检查会自动发现这个问题）。
+
+6. **全局对象兜底必须显式列出 `global`。** 抖音小程序（TMA）的模块作用域里
+   `globalThis` / `window` / `self` 都不存在，只有 `global`；而打包器会把源码里的
+   `this` 兜底编译成 `void 0`。所以 `core/`、`data/` 下每个 IIFE 的结尾，以及
+   `core/index.js`、`data/index.js` 取命名空间时，都统一写成
+   `globalThis || self || window || global` 的显式兜底链，不能依赖 `this`。
+   微信端 `globalThis` 存在，走第一条分支，行为不变。

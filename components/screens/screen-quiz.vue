@@ -124,6 +124,16 @@
 			color: $ws-muted;
 		}
 
+		&__bank {
+			margin-left: 14rpx;
+			padding: 4rpx 14rpx;
+			font-size: 21rpx;
+			color: $ws-gold-ink;
+			background: $ws-gold-soft;
+			border: 1rpx solid $ws-gold-line;
+			border-radius: 999rpx;
+		}
+
 		&__pad {
 			width: 190rpx;
 		}

@@ -32,7 +32,7 @@
 			</view>
 		</view>
 
-		<WsCard flat custom-style="margin-top: 28rpx; padding: 40rpx;">
+		<WsCard flat custom-style="margin-top: 18rpx; padding: 28rpx;">
 			<text class="ending__narration">{{ r ? r.narration : '' }}</text>
 		</WsCard>
 
@@ -55,7 +55,9 @@
 
 		<WsHomeFoot :game="game" :stick="false" />
 
-		<!-- 翻盘弹层：只在 C 级且没用过时出现 -->
+		<!--
+			【广告暂时下线】「人生没有重来」翻盘弹层先注释掉；恢复广告时取消本段注释。
+			同时 core/game-engine.js 里也不再进入 revive 阶段。
 		<view v-if="isRevive" class="revive-mask">
 			<view class="revive">
 				<text class="revive__title">{{ game.t('reviveTitle') }}</text>
@@ -67,6 +69,7 @@
 				<WsButton :label="game.t('btnSkipAd')" variant="plain" size="sm" @tap="onSkip" />
 			</view>
 		</view>
+		-->
 	</view>
 </template>
 
@@ -131,14 +134,18 @@
 			},
 			onToCard() {
 				this.game.sfx.play('tap')
-				this.game.actions.watchAdForResultCard()
-			},
+				// 【广告暂时下线】原先需看完广告才放行，现直接进入结果卡。
+				// 恢复广告时改回：this.game.actions.watchAdForResultCard()
+				this.game.actions.toResultCard()
+			}
+			/* 【广告暂时下线】翻盘弹层的两个处理函数一并注释掉。
 			onWatchAd() {
 				this.game.actions.watchAd()
 			},
 			onSkip() {
 				this.game.actions.skipRevive()
 			}
+			*/
 		}
 	}
 </script>
@@ -150,7 +157,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 56rpx 48rpx 40rpx;
+		padding: 44rpx 40rpx 20rpx;
 	}
 
 	.ending {
@@ -163,54 +170,54 @@
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			width: 156rpx;
-			height: 156rpx;
-			margin-top: 32rpx;
+			width: 118rpx;
+			height: 118rpx;
+			margin-top: 18rpx;
 			border-radius: 50%;
 			border: 4rpx solid #EBCF7E;
 		}
 
 		&__badge-text {
-			font-size: 66rpx;
+			font-size: 52rpx;
 			font-weight: bold;
 			line-height: 1;
 		}
 
 		&__quality {
-			margin-top: 22rpx;
+			margin-top: 14rpx;
 			font-size: 24rpx;
 			font-weight: bold;
 		}
 
 		&__persona {
-			margin-top: 26rpx;
-			font-size: 30rpx;
+			margin-top: 14rpx;
+			font-size: 28rpx;
 			color: $ws-ink-2;
 		}
 
 		&__title {
-			margin-top: 18rpx;
-			font-size: 50rpx;
+			margin-top: 10rpx;
+			font-size: 44rpx;
 			font-weight: bold;
 			color: $ws-ink;
 		}
 
 		&__narration {
-			font-size: 26rpx;
-			line-height: 1.85;
+			font-size: 25rpx;
+			line-height: 1.7;
 			color: $ws-ink-2;
 		}
 
 		&__attrs {
-			margin-top: 28rpx;
-			font-size: 23rpx;
+			margin-top: 16rpx;
+			font-size: 22rpx;
 			color: $ws-muted;
 		}
 
 		&__actions {
 			width: 100%;
 			margin-top: auto;
-			padding-top: 44rpx;
+			padding-top: 22rpx;
 		}
 	}
 
@@ -222,8 +229,8 @@
 		align-items: center;
 		justify-content: space-between;
 		box-sizing: border-box;
-		margin-top: 30rpx;
-		padding: 24rpx 34rpx;
+		margin-top: 18rpx;
+		padding: 18rpx 30rpx;
 		background-color: $ws-surface-2;
 		border-radius: 20rpx;
 
@@ -245,7 +252,7 @@
 		}
 
 		&__num {
-			font-size: 58rpx;
+			font-size: 50rpx;
 			font-weight: bold;
 			line-height: 1;
 		}
@@ -256,7 +263,7 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: center;
-		margin-top: 20rpx;
+		margin-top: 14rpx;
 
 		&__item {
 			padding: 10rpx 22rpx;
@@ -275,8 +282,8 @@
 	.fresh {
 		width: 100%;
 		box-sizing: border-box;
-		margin-top: 28rpx;
-		padding: 26rpx 30rpx;
+		margin-top: 18rpx;
+		padding: 20rpx 26rpx;
 		background-color: $ws-gold-soft;
 		border: 2rpx solid $ws-gold-line;
 		border-radius: 20rpx;

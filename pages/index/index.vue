@@ -10,13 +10,13 @@
 	-->
 	<view class="ws-root">
 		<!--
-			启动加载页：应用一进来先完整展示一张启动图（/static/home.png），
+			启动加载页：应用一进来先完整展示一张启动图（/static/home.jpg），
 			短暂停留后淡出，再露出隐私页 / 首页。放在这一层而不是单独注册页面，
 			是为了让 H5 / 小程序 / App 三端都吃到同一套加载体验，而且不参与
 			游戏状态机，不影响返回键与存档逻辑。
 		-->
 		<view v-if="splashVisible" class="ws-splash" :class="{ 'is-fading': splashFading }">
-			<image class="ws-splash__bg" src="/static/home.png" mode="aspectFill" />
+			<image class="ws-splash__bg" src="/static/home.jpg" mode="aspectFill" />
 		</view>
 
 		<ScreenPrivacy v-if="game.screen === 'privacy'" :game="game" />

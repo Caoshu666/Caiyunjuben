@@ -47,6 +47,9 @@
     this.personas = [];
     this.endings = [];
     this.questions = [];
+    this.questionBanks = null; // 题库组，供「整库随机」用
+    this.eventBanks = null;   // 事件库组，供「整库随机」用
+    this.currentEventBank = null; // 本局选中的事件库标识（key）
     this.text = {};
     this.fortune = {};
 
@@ -138,13 +141,65 @@
   };
 
   GameEngine.prototype._findEvent = function (id) {
-    for (var i = 0; i < this.events.length; i++) if (this.events[i].id === id) return this.events[i];
+    // 先在本局选中的事件库里找（整库随机时事件 id 属于某一套库）
+    var pool = this.draw && this.draw.events ? this.draw.events : this.events;
+    for (var i = 0; i < pool.length; i++) if (pool[i].id === id) return pool[i];
+    // 兜底：再在全集（A 套）里找，兼容旧存档 / 未启用事件库组的场景
+    if (pool !== this.events) {
+      for (var j = 0; j < this.events.length; j++) if (this.events[j].id === id) return this.events[j];
+    }
     return null;
   };
 
   /* ------------------------------------------------------------------ */
   /* 生命周期                                                            */
   /* ------------------------------------------------------------------ */
+
+  /**
+   * 根据 questionSets 定义，把各套题库打包成 [{key, questions}]。
+   *
+   * 只有当一个 set 引用的表真实存在、且非空时才会被纳入；
+   * 若没有任何可用的套库，返回 null（TestEngine 会退回旧的全量混抽行为）。
+   */
+  GameEngine.prototype._buildQuestionBanks = function () {
+    var sets = this.config.get('questionSets');
+    if (!sets || !sets.length) return null;
+
+    var banks = [];
+    for (var i = 0; i < sets.length; i++) {
+      var s = sets[i];
+      var qs = s && s.table ? this.config.get(s.table) : null;
+      if (qs && qs.length) {
+        banks.push({ key: s.key, questions: qs });
+      }
+    }
+    return banks.length ? banks : null;
+  };
+
+  /**
+   * 根据 eventSets 定义，把各套事件库打包成 [{key, events}]。
+   * 与 _buildQuestionBanks 同构，供「整库随机」在每局开始时选一套事件库。
+   */
+  GameEngine.prototype._buildEventBanks = function () {
+    var sets = this.config.get('eventSets');
+    if (!sets || !sets.length) return null;
+
+    var banks = [];
+    for (var i = 0; i < sets.length; i++) {
+      var s = sets[i];
+      var evs = s && s.table ? this.config.get(s.table) : null;
+      if (evs && evs.length) {
+        banks.push({ key: s.key, events: evs });
+      }
+    }
+    return banks.length ? banks : null;
+  };
+
+  /** 从事件库组里随机选一套（返回 {key, events} 或 null） */
+  GameEngine.prototype._pickEventBank = function () {
+    if (!this.eventBanks || !this.eventBanks.length) return null;
+    return this.rng.pick(this.eventBanks);
+  };
 
   /** 加载配置并进入第一个界面 */
   GameEngine.prototype.start = function () {
@@ -155,6 +210,14 @@
     this.questions = this.config.get('question') || [];
     this.text = this.config.get('text') || {};
     this.fortune = this.config.get('fortune') || {};
+
+    // 题库组（整库随机）：如果存在 questionSets 定义，则把各套题库打包成
+    // [{key, questions}] 交给 TestEngine 做「每次开局随机选一套」。
+    // 没有 questionSets 或表缺失时，保持 questionBanks 为 null，走旧行为。
+    this.questionBanks = this._buildQuestionBanks();
+
+    // 事件库组（整库随机）：与题库组同构，把多套事件库打包成 [{key, events}]。
+    this.eventBanks = this._buildEventBanks();
 
     this.draw = new NS.EventDraw({ events: this.events, rng: this.rng });
 
@@ -197,8 +260,15 @@
      * 残局。两局的状态混在一起，是最难解释的一类 bug。
      */
     this.clearSave();
-    this.quiz = new NS.TestEngine({ questions: this.questions, rng: this.rng });
-    this.quiz.start();
+    this.quiz = new NS.TestEngine({ questions: this.questions, banks: this.questionBanks, rng: this.rng });
+    this.quiz.pickBank().start();
+
+    // 事件库（整库随机）：每局开始时随机选一套事件库，用它重建 EventDraw。
+    // 选中的事件库含本库内的连锁（weight=0）隐藏事件，保证 chain 闭环。
+    var evBank = this._pickEventBank();
+    this.currentEventBank = evBank ? evBank.key : null;
+    this.draw = new NS.EventDraw({ events: evBank ? evBank.events : this.events, rng: this.rng });
+
     this.state.phase = PHASE.QUIZ;
     this.emit('change');
     return this.quiz.current();
@@ -557,11 +627,14 @@
     this.state.playCount++;
     this._unlock(r);
 
-    if (r.quality === 'C' && !this.state.reviveUsed) {
-      this.state.phase = PHASE.REVIVE;
-    } else {
-      this.state.phase = PHASE.ENDING;
-    }
+    // 【广告暂时下线】不再触发「人生没有重来」翻盘弹层，C 级也直接进结局页。
+    // 恢复翻盘时取消下面注释，并删掉最后那行 this.state.phase = PHASE.ENDING;
+    // if (r.quality === 'C' && !this.state.reviveUsed) {
+    //   this.state.phase = PHASE.REVIVE;
+    // } else {
+    //   this.state.phase = PHASE.ENDING;
+    // }
+    this.state.phase = PHASE.ENDING;
     /*
      * 一局到此结束，存档没有继续存在的理由，必须清掉。
      *
@@ -612,7 +685,8 @@
     this._writeJSON(COLLECTION_KEY, col);
   };
 
-  /** 观看激励视频翻盘：回退到第 4 阶段重来一次 */
+  /* 【广告暂时下线】观看激励视频翻盘的方法先注释掉（翻盘入口已一并移除）。
+  /// 观看激励视频翻盘：回退到第 4 阶段重来一次
   GameEngine.prototype.watchAdForRevive = function () {
     var self = this;
     if (!this.adapter.showRewardedVideo) {
@@ -624,6 +698,7 @@
       return true;
     });
   };
+  */
 
   GameEngine.prototype._doRevive = function () {
     var lastIndex = this.stages.length - 1;
@@ -777,6 +852,7 @@
       consecutiveNeg: s.consecutiveNeg,
       chainQueue: s.chainQueue,
       currentEventId: s.currentEvent ? s.currentEvent.id : null,
+      eventBankKey: this.currentEventBank || null,
       stageSnapshot: s.stageSnapshot,
       reviveUsed: s.reviveUsed,
       history: s.history,
@@ -822,6 +898,20 @@
     s.history = d.history || [];
     this.rng._s = d.rngState || this.rng._s;
 
+    // 恢复本局选中的事件库（整库随机）：保证续玩时抽到的事件与开局一致，
+    // 且连锁事件（chain）能在同一套库内闭环。
+    this.currentEventBank = d.eventBankKey || null;
+    var evPool = this.events;
+    if (this.currentEventBank && this.eventBanks) {
+      for (var bi = 0; bi < this.eventBanks.length; bi++) {
+        if (this.eventBanks[bi].key === this.currentEventBank) {
+          evPool = this.eventBanks[bi].events;
+          break;
+        }
+      }
+    }
+    this.draw = new NS.EventDraw({ events: evPool, rng: this.rng });
+
     s.currentEvent = this._findEvent(d.currentEventId);
     s.revealed = false;
     s.result = null;
@@ -865,4 +955,4 @@
   NS.GameEngine = GameEngine;
   NS.GameEngine.PHASE = PHASE;
   NS.GameEngine.SAVE_KEY = SAVE_KEY;
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

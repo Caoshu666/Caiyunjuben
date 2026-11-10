@@ -1,6 +1,6 @@
 {
-    "name" : "我的财运剧本",
-    "appid" : "__UNI__8FCAD60",
+    "name" : "财富模拟器",
+    "appid" : "__UNI__5BFB6D9",
     "description" : "先测人格，再过一局人生的财运剧本小游戏",
     "versionName" : "1.3.0",
     "versionCode" : "130",
@@ -44,27 +44,48 @@
             "ios" : {},
             /* SDK配置 */
             "sdkConfigs" : {},
-            /* App 应用图标：源图统一用 static/logo.png，正式打包时建议用 HBuilderX 视觉编辑器按源图重新生成各密度尺寸 */
+            /* App 应用图标：源图统一用 assets/logo.png（放在 static 之外，避免被打进小程序包），正式打包时建议用 HBuilderX 视觉编辑器按源图重新生成各密度尺寸 */
             "icons" : {
                 "android" : {
-                    "ldpi" : "static/logo.png",
-                    "mdpi" : "static/logo.png",
-                    "hdpi" : "static/logo.png",
-                    "xhdpi" : "static/logo.png",
-                    "xxhdpi" : "static/logo.png",
-                    "xxxhdpi" : "static/logo.png"
+                    "ldpi" : "assets/logo.png",
+                    "mdpi" : "assets/logo.png",
+                    "hdpi" : "unpackage/res/icons/72x72.png",
+                    "xhdpi" : "unpackage/res/icons/96x96.png",
+                    "xxhdpi" : "unpackage/res/icons/144x144.png",
+                    "xxxhdpi" : "unpackage/res/icons/192x192.png"
                 },
                 "ios" : {
-                    "appstore" : "static/logo.png"
+                    "appstore" : "unpackage/res/icons/1024x1024.png",
+                    "ipad" : {
+                        "app" : "unpackage/res/icons/76x76.png",
+                        "app@2x" : "unpackage/res/icons/152x152.png",
+                        "notification" : "unpackage/res/icons/20x20.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png",
+                        "proapp@2x" : "unpackage/res/icons/167x167.png",
+                        "settings" : "unpackage/res/icons/29x29.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "spotlight" : "unpackage/res/icons/40x40.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png"
+                    },
+                    "iphone" : {
+                        "app@2x" : "unpackage/res/icons/120x120.png",
+                        "app@3x" : "unpackage/res/icons/180x180.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png",
+                        "notification@3x" : "unpackage/res/icons/60x60.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "settings@3x" : "unpackage/res/icons/87x87.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png",
+                        "spotlight@3x" : "unpackage/res/icons/120x120.png"
+                    }
                 }
             },
-            /* App 启动图（加载界面）：源图统一用 static/home.png，iOS 侧同样建议用视觉编辑器生成 */
+            /* App 启动图（加载界面）：源图用 static/home.jpg，iOS 侧同样建议用视觉编辑器生成 */
             "splashscreen" : {
                 "android" : {
-                    "hdpi" : "static/home.png",
-                    "xhdpi" : "static/home.png",
-                    "xxhdpi" : "static/home.png",
-                    "xxxhdpi" : "static/home.png"
+                    "hdpi" : "static/home.jpg",
+                    "xhdpi" : "static/home.jpg",
+                    "xxhdpi" : "static/home.jpg",
+                    "xxxhdpi" : "static/home.jpg"
                 }
             }
         }
@@ -74,7 +95,7 @@
     /* 小程序特有相关 */
     "mp-weixin" : {
         /* ← 上线前改成本人小程序的 AppID；当前留空表示用测试号预览 */
-        "appid" : "",
+        "appid" : "wx691cf5f5f633f0f1",
         "setting" : {
             "urlCheck" : false,
             /* 关闭 ES6 转 ES5 以外的额外编译，保持与 uni-app 编译产物一致 */
@@ -83,12 +104,8 @@
             "postcss" : true
         },
         "usingComponents" : true,
-        /* 结果卡需要写入相册，提前声明用途，减少审核沟通成本 */
-        "permission" : {
-            "scope.writePhotosAlbum" : {
-                "desc" : "用于把「我的财运剧本」结果卡保存到你的相册"
-            }
-        }
+        /* 组件按需注入：只注入当前页面用到的组件，减小启动开销（微信「代码依赖分析」要求） */
+        "lazyCodeLoading" : "requiredComponents"
     },
     "mp-alipay" : {
         "usingComponents" : true
@@ -97,7 +114,8 @@
         "usingComponents" : true
     },
     "mp-toutiao" : {
-        "usingComponents" : true
+        "usingComponents" : true,
+        "appid" : "tt2fd3596eb1acb43401"
     },
     "vueVersion" : "3"
 }

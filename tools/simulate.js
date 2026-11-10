@@ -174,7 +174,7 @@ function run() {
 
   console.log('');
   console.log(line('=', 62));
-  console.log('  我的财运剧本 · 数值模拟报告');
+  console.log('  财富模拟器 · 数值模拟报告');
   console.log(line('=', 62));
   console.log('  模拟局数 : ' + N + '    种子起点 : ' + SEED + '    耗时 : ' + ms + ' ms');
   console.log('  平均每局抉择次数 : ' + (stepsSum / N).toFixed(2) + ' 次');

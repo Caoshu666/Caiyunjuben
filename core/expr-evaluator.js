@@ -192,4 +192,4 @@
     // 暴露出来方便单测
     _tokenize: tokenize
   };
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

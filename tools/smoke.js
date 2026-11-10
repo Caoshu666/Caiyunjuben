@@ -272,7 +272,8 @@ function testSaveResume() {
   assert(!!e2.state.currentEvent, '续玩后仍有可玩的事件');
 }
 
-/** 翻盘分支：找一个会打到 C 级、从而触发 revive 的种子 */
+/* 【广告暂时下线】翻盘分支用例先停用（翻盘入口已移除）。恢复广告时取消本段注释。
+// 翻盘分支：找一个会打到 C 级、从而触发 revive 的种子
 function testReviveBranch() {
   let found = null;
   for (let seed = 1; seed <= 400 && !found; seed++) {
@@ -322,6 +323,7 @@ function testReviveBranch() {
       );
     });
 }
+*/
 
 /** 隐藏结局的条件表达式是否能全部求值（这是自研求值器的核心风险点） */
 function testEndingConditions() {
@@ -1734,7 +1736,7 @@ function testSaveLifecycle() {
 
 console.log('');
 console.log('='.repeat(64));
-console.log('  《我的财运剧本》uni-app 冒烟测试');
+console.log('  《财富模拟器》uni-app 冒烟测试');
 console.log('='.repeat(64));
 
 /** 顺序执行，让输出编号与真实执行顺序一致（翻盘分支是异步的，所以整体用 async 串起来） */
@@ -1742,8 +1744,9 @@ async function main() {
   testLogicChain();
   testSaveResume();
 
-  section('C. 激励视频翻盘分支');
-  await testReviveBranch();
+  // 【广告暂时下线】翻盘分支用例先停用
+  // section('C. 激励视频翻盘分支');
+  // await testReviveBranch();
 
   testEndingConditions();
   testQuizRewind();

@@ -54,4 +54,4 @@
       intro: '该有的都有了，没得到的也差不多认了。现在的问题是：接下来呢？'
     }
   ];
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

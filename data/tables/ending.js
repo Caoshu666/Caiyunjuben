@@ -126,4 +126,4 @@
         '现在他们改口了，说你从一开始就看得很清楚。'
     }
   ];
-})(typeof globalThis !== 'undefined' ? globalThis : this);
+})(typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global);

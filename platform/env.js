@@ -45,6 +45,23 @@ export function hasRewardedVideo() {
   return platform() === 'mp-weixin';
 }
 
+/**
+ * 结果卡底部二维码要用的【小程序码图片路径】。
+ *
+ * 为什么要按平台分开：微信和抖音各有各的小程序码，扫错了打不开对方的小程序。
+ * 所以两端各自在开放平台生成一张指向首页 `pages/index/index` 的码图，放进
+ * `static/qrcode/` 下，这里只负责按当前平台返回对应路径。
+ *
+ * 返回空串表示当前端没有可用的小程序码（H5 / App / 其它小程序），
+ * 调用方据此不画二维码、改画一行引导文案。
+ */
+export function miniProgramQrPath() {
+  const p = platform();
+  if (p === 'mp-weixin') return '/static/qrcode/wx.png';
+  if (p === 'mp-toutiao') return '/static/qrcode/tt.png';
+  return '';
+}
+
 export const HAS_WINDOW = HAS_DOM;
 
-export default { platform, isMiniProgram, isWeixin, hasRewardedVideo, HAS_WINDOW };
+export default { platform, isMiniProgram, isWeixin, hasRewardedVideo, miniProgramQrPath, HAS_WINDOW };

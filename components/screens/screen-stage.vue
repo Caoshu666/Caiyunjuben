@@ -137,7 +137,22 @@
 			game: { type: Object, required: true }
 		},
 		data() {
-			return { LABEL: ATTR_LABEL }
+			return { LABEL: ATTR_LABEL, tapGuardUntil: 0 }
+		},
+		mounted() {
+			/*
+			 * 防「点击穿透」。
+			 *
+			 * 抖音小程序的点击语义接近 H5：如果被点中的元素在这一次触摸
+			 * 结束前就被移除，这一次点击会「穿透」到下方新出现的元素上。
+			 * 阶段页正好踩中：点「继续」会收起结算浮层、同时渲染下一件事的
+			 * 选项，而选项的位置又和刚消失的按钮重合 —— 于是那一下点击被
+			 * 顺带记成了对下一件事的选择（表现就是「第二、三件事自己选好了」）。
+			 *
+			 * 进入阶段页时同理：建号页点「开始人生」也可能穿透到刚出现的
+			 * 第一个选项上。所以在「一屏内容刚变化」的极短窗口内忽略选项点击。
+			 */
+			this.guardTaps()
 		},
 		computed: {
 			st() {
@@ -178,15 +193,22 @@
 			}
 		},
 		methods: {
+			/** 在接下来的一小段窗口里忽略选项点击，挡住点击穿透（见 mounted 的说明） */
+			guardTaps() {
+				this.tapGuardUntil = Date.now() + 400
+			},
 			onChoose(i) {
+				if (Date.now() < this.tapGuardUntil) return
 				this.game.sfx.play('tap')
 				this.game.actions.chooseOption(i)
 			},
 			onNext() {
+				this.guardTaps()
 				this.game.sfx.play('tap')
 				this.game.actions.advance()
 			},
 			onChangeChoice() {
+				this.guardTaps()
 				this.game.sfx.play('tap')
 				this.game.actions.stageBack()
 			},
@@ -195,6 +217,7 @@
 					this.game.showToast(this.game.t('stageBackFirst'))
 					return
 				}
+				this.guardTaps()
 				this.game.sfx.play('tap')
 				this.game.actions.stageBack()
 			}

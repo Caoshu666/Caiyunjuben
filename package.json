@@ -2,7 +2,7 @@
 	"name": "wealth-script-uniapp",
 	"version": "1.3.0",
 	"private": true,
-	"description": "我的财运剧本 · uni-app 版（H5 / 微信小程序 / App 多端）",
+	"description": "财富模拟器 · uni-app 版（H5 / 微信小程序 / App 多端）",
 	"scripts": {
 		"sim": "node tools/simulate.js",
 		"sim:100k": "node tools/simulate.js --n=100000",

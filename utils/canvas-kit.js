@@ -70,18 +70,27 @@ export function setFont(ctx, size, weight) {
   ctx.font = (weight ? weight + ' ' : '') + size + 'px ' + FONT_FAMILY;
 }
 
+/**
+ * 圆角矩形路径。
+ *
+ * ★ 不能用 ctx.arcTo：抖音小程序的 CanvasContext 没有实现 arcTo，
+ *   调用会抛 "ctx.arcTo is not a function"，整张卡直接绘制失败（一片空白）。
+ *   改成「直线 + arc 画四角」的写法 —— arc 在三端（微信/抖音/H5）都稳定支持。
+ * 圆弧角度：0 在三点钟方向、顺时针为正，四角依次是右上/右下/左下/左上。
+ */
 export function roundRect(ctx, x, y, w, h, r) {
   const rr = Math.min(r, w / 2, h / 2);
+  const HALF_PI = Math.PI / 2;
   ctx.beginPath();
   ctx.moveTo(x + rr, y);
   ctx.lineTo(x + w - rr, y);
-  ctx.arcTo(x + w, y, x + w, y + rr, rr);
+  ctx.arc(x + w - rr, y + rr, rr, -HALF_PI, 0);
   ctx.lineTo(x + w, y + h - rr);
-  ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
+  ctx.arc(x + w - rr, y + h - rr, rr, 0, HALF_PI);
   ctx.lineTo(x + rr, y + h);
-  ctx.arcTo(x, y + h, x, y + h - rr, rr);
+  ctx.arc(x + rr, y + h - rr, rr, HALF_PI, Math.PI);
   ctx.lineTo(x, y + rr);
-  ctx.arcTo(x, y + rr, x + rr, y, rr);
+  ctx.arc(x + rr, y + rr, rr, Math.PI, Math.PI + HALF_PI);
   ctx.closePath();
 }
 
@@ -197,22 +206,26 @@ export function radar(ctx, cx, cy, r, entries, opt) {
 }
 
 /* ------------------------------------------------------------------ */
-/* 结果卡（导出图片用，540 × 760 设计像素）                              */
+/* 结果卡（导出图片用，540 × 900 设计像素）                              */
 /* ------------------------------------------------------------------ */
 
 const CARD_W = 540;
-const CARD_H = 760;
+const CARD_H = 900;
 
 /**
  * 把结果卡画到 canvas 上
  * @param {CanvasContext} ctx
  * @param {Object} d {
- *   persona, attrs, result, pseudoPercent
+ *   persona, attrs, result, pseudoPercent, qrPath
  * }
  *
  * 与原 Canvas 版本的区别：原版直接画在 750×1334 的主画布上，
- * 这里抽成独立函数、只画卡片本身（540×800），这样它既能当页面上的展示，
+ * 这里抽成独立函数、只画卡片本身（540×900），这样它既能当页面上的展示，
  * 也能直接导出成图片。卡片内部的坐标全部相对卡片左上角。
+ *
+ * 卡片底部新增二维码区（约 140 高）：微信 / 抖音各自扫自己的小程序码进小程序。
+ * `qrPath` 为码图路径时画码 + 引导文案；为空（H5 / App 等）时改画一行居中引导文案，
+ * 避免卡片底部留白。
  */
 export function drawResultCard(ctx, d) {
   const persona = d.persona || {};
@@ -241,7 +254,7 @@ export function drawResultCard(ctx, d) {
   const cx = cardX + cardW / 2;
 
   // 卡头
-  text(ctx, '我的财运剧本', cx, cardY + 44, {
+  text(ctx, '财富模拟器', cx, cardY + 44, {
     size: 24, weight: 'bold', color: COLORS.goldInk, align: 'center'
   });
   ctx.strokeStyle = COLORS.goldLine;
@@ -325,6 +338,46 @@ export function drawResultCard(ctx, d) {
   text(ctx, '全服仅 ' + (d.pseudoPercent || '0.0') + '% 玩家达成此结局', cx, cardY + 725, {
     size: 20, weight: 'bold', color: COLORS.goldInk, align: 'center', baseline: 'middle'
   });
+
+  // 底部二维码区：微信 / 抖音各画各的小程序码，扫码进小程序
+  ctx.strokeStyle = COLORS.goldLine;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cardX + 30, cardY + 758);
+  ctx.lineTo(cardX + cardW - 30, cardY + 758);
+  ctx.stroke();
+
+  // qrImage 是 2d 接口下已经加载好的 Image 节点；qrPath 是旧接口下的图片路径
+  const qrSrc = d.qrImage || d.qrPath;
+
+  if (qrSrc) {
+    const qrSize = 120;
+    const qrX = cardX + 40;
+    const qrY = cardY + 770;
+
+    // 白底衬一下，避免码图半透明时和卡底糊在一起
+    ctx.fillStyle = '#FFFFFF';
+    roundRect(ctx, qrX - 6, qrY - 6, qrSize + 12, qrSize + 12, 10);
+    ctx.fill();
+    ctx.strokeStyle = COLORS.line;
+    ctx.lineWidth = 1;
+    roundRect(ctx, qrX - 6, qrY - 6, qrSize + 12, qrSize + 12, 10);
+    ctx.stroke();
+
+    ctx.drawImage(qrSrc, qrX, qrY, qrSize, qrSize);
+
+    const tx = qrX + qrSize + 26;
+    text(ctx, '扫码测测你的财运剧本', tx, cardY + 818, {
+      size: 23, weight: 'bold', color: COLORS.ink, baseline: 'middle'
+    });
+    text(ctx, '长按识别小程序码', tx, cardY + 858, {
+      size: 19, color: COLORS.muted, baseline: 'middle'
+    });
+  } else {
+    text(ctx, '来玩「财富模拟器」', cx, cardY + 838, {
+      size: 23, weight: 'bold', color: COLORS.goldInk, align: 'center', baseline: 'middle'
+    });
+  }
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
