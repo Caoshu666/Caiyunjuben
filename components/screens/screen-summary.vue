@@ -48,6 +48,19 @@
 		props: {
 			game: { type: Object, required: true }
 		},
+		data() {
+			return { tapGuardUntil: 0 }
+		},
+		mounted() {
+			/*
+			 * 防「一次点击连跳两级」。
+			 * 阶段页结算浮层的「继续」→ advance() 会切到本页；在 H5 上同一次
+			 * 点击可能又落到本页的「继续」上，让 nextStage() 连调两次 —— 表现
+			 * 就是转折期结算后本该进收尾期，却直接进了结果页。进页的头一瞬间
+			 * 与每次点击后的极短窗口内忽略点击，挡掉这次重复。
+			 */
+			this.tapGuardUntil = Date.now() + 400
+		},
 		computed: {
 			stage() {
 				return this.game.currentStage
@@ -71,6 +84,8 @@
 		},
 		methods: {
 			onNext() {
+				if (Date.now() < this.tapGuardUntil) return
+				this.tapGuardUntil = Date.now() + 400
 				this.game.sfx.play('tap')
 				this.game.actions.nextStage()
 			},

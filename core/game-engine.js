@@ -482,6 +482,14 @@
   };
 
   GameEngine.prototype.nextStage = function () {
+    /*
+     * 只允许从「阶段结算」推进到下一阶段。
+     * 这既是语义约束，也是一道幂等保护：界面上一次点击若被重复触发
+     * （H5 组件点击「$emit + 原生冒泡」双触发、或触摸穿透），第二次调用
+     * 会因为 phase 已经不是 summary 而直接返回 —— 不会再连跳两级导致
+     * 「转折期结算后跳过收尾期、直接进结果页」。
+     */
+    if (this.state.phase !== PHASE.SUMMARY) return;
     var next = this.state.stageIndex + 1;
     if (next < this.stages.length) {
       this._enterStage(next);
